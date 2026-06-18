@@ -1,0 +1,5 @@
+# Dependências locais para o IDE e testes
+strands
+boto3
+pytest
+pytest-mock

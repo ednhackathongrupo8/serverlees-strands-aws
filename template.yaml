@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  DocuSmart - Analisador de Sinistros com Agentes Strands.
+  Template opcional para deploy via AWS SAM.
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 512
+    Runtime: python3.12
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        DYNAMO_TABLE_NAME: !Ref ResultadosTable
+        DOCUMENTS_BUCKET: !Ref DocumentosBucket
+
+Resources:
+  # ---------------------------------------------
+  # S3 Bucket
+  # ---------------------------------------------
+  DocumentosBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub docusmart-sinistros-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+
+  # ---------------------------------------------
+  # DynamoDB Table
+  # ---------------------------------------------
+  ResultadosTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: sinistros-resultados-sam
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+
+  # ---------------------------------------------
+  # API Gateway
+  # ---------------------------------------------
+  DocusmartApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: default
+
+  # ---------------------------------------------
+  # Lambda 1: Analisar
+  # ---------------------------------------------
+  AnalisarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/lambda_analisar/
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - arn:aws:lambda:us-east-1:856699698935:layer:strands-agents-py3_12-x86_64:2
+      Policies:
+        - AmazonTextractFullAccess
+        - AmazonDynamoDBFullAccess
+        - AmazonS3ReadOnlyAccess
+        - AmazonBedrockFullAccess
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref DocusmartApi
+            Path: /analisar-sinistro
+            Method: POST
+
+  # ---------------------------------------------
+  # Lambda 2: Consultar
+  # ---------------------------------------------
+  ConsultarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/lambda_consultar/
+      Handler: lambda_function.lambda_handler
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref DocusmartApi
+            Path: /sinistro/{id}
+            Method: GET
+
+Outputs:
+  ApiEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${DocusmartApi}.execute-api.${AWS::Region}.amazonaws.com/"

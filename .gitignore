@@ -1,0 +1,33 @@
+# Dependências Python
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ferramentas
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.mypy_cache/
+
+# AWS SAM
+.aws-sam/
+packaged.yaml
+
+# IDEs / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Variáveis de Ambiente
+.env
+.env.*
+!.env.example
