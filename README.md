@@ -40,7 +40,7 @@ Cliente (curl / Postman)
   └─────┬──────┘
         │
   ┌─────▼──────────────────────────────┐
-  │  Lambda: docusmart-analisar        │
+  │  Lambda: lambda-analisar        │
   │  Python 3.12 + Strands Layer       │
   │                                    │
   │  ┌──────────────────────────────┐  │
@@ -55,7 +55,7 @@ Cliente (curl / Postman)
   GET /sinistro/{id}
         │
   ┌─────▼──────────────────────────────┐
-  │  Lambda: docusmart-consultar       │──► DynamoDB
+  │  Lambda: lambda-consultar       │──► DynamoDB
   │  (bônus)                           │
   └────────────────────────────────────┘
 ```
@@ -94,7 +94,7 @@ Cliente (curl / Postman)
 |---------|--------|-------------------|
 | **S3** | Armazenamento dos documentos | Bucket: `docusmart-sinistros` |
 | **DynamoDB** | Armazenamento dos resultados | Tabela: `sinistros-resultados` |
-| **Lambda** | Executa o agente Strands | `docusmart-analisar` + `docusmart-consultar` |
+| **Lambda** | Executa o agente Strands | `lambda-analisar` + `lambda-consultar` |
 | **API Gateway** | Endpoint REST | HTTP API |
 | **Amazon Bedrock** | LLM para classificação e resumo | Modelo: `us.amazon.nova-lite-v1:0` |
 | **Amazon Textract** | OCR / extração de texto | `detect_document_text` |
@@ -152,7 +152,7 @@ Cliente (curl / Postman)
 
 ---
 
-### Etapa 4 — Criar a Lambda Principal (`docusmart-analisar`)
+### Etapa 4 — Criar a Lambda Principal (`lambda-analisar`)
 
 #### 4.1 — Criar a função
 
@@ -162,7 +162,7 @@ Cliente (curl / Postman)
 
 | Campo | Valor |
 |-------|-------|
-| Function name | `docusmart-analisar` |
+| Function name | `lambda-analisar` |
 | Runtime | **Python 3.12** |
 | Architecture | **x86_64** |
 
@@ -402,7 +402,7 @@ def lambda_handler(event, context):
 3. Na tela de integrações:
    - Clique em **Add integration**
    - Integration type: **Lambda**
-   - Lambda function: `docusmart-analisar`
+   - Lambda function: `lambda-analisar`
    - API name: `docusmart-api`
 4. Clique em **Next**
 
@@ -411,7 +411,7 @@ def lambda_handler(event, context):
 1. Na tela de rotas:
    - Method: **POST**
    - Resource path: `/analisar-sinistro`
-   - Integration target: `docusmart-analisar`
+   - Integration target: `lambda-analisar`
 2. Clique em **Next**
 
 #### 5.3 — Stage
@@ -463,7 +463,7 @@ curl -X POST https://SEU_ENDPOINT/analisar-sinistro \
 
 ---
 
-### Etapa 7 — Bônus: Lambda de Consulta (`docusmart-consultar`)
+### Etapa 7 — Bônus: Lambda de Consulta (`lambda-consultar`)
 
 #### 7.1 — Criar a segunda Lambda
 
@@ -472,7 +472,7 @@ curl -X POST https://SEU_ENDPOINT/analisar-sinistro \
 
 | Campo | Valor |
 |-------|-------|
-| Function name | `docusmart-consultar` |
+| Function name | `lambda-consultar` |
 | Runtime | **Python 3.12** |
 | Architecture | **x86_64** |
 
@@ -542,7 +542,7 @@ Clique em **Deploy**.
 4. Clique em **Create**
 5. Vá em **Integrations** → selecione a rota `GET /sinistro/{id}` → **Attach integration → Create and attach**
 6. Integration type: **Lambda**
-7. Lambda function: `docusmart-consultar`
+7. Lambda function: `lambda-consultar`
 8. Clique em **Create**
 
 #### 7.5 — Testar a consulta
@@ -559,8 +559,8 @@ curl https://SEU_ENDPOINT/sinistro/7f3a91bc-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 | Método | Rota | Lambda | Descrição |
 |--------|------|--------|-----------|
-| `POST` | `/analisar-sinistro` | `docusmart-analisar` | Envia documento para análise pelo agente Strands |
-| `GET` | `/sinistro/{id}` | `docusmart-consultar` | Consulta resultado salvo no DynamoDB (bônus) |
+| `POST` | `/analisar-sinistro` | `lambda-analisar` | Envia documento para análise pelo agente Strands |
+| `GET` | `/sinistro/{id}` | `lambda-consultar` | Consulta resultado salvo no DynamoDB (bônus) |
 
 ---
 
@@ -569,7 +569,7 @@ curl https://SEU_ENDPOINT/sinistro/7f3a91bc-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 - [ ] Documentos de teste estão no bucket `docusmart-sinistros`
 - [ ] Tabela `sinistros-resultados` existe no DynamoDB
 - [ ] Modelo **Nova Lite** habilitado no Amazon Bedrock
-- [ ] Layer do Strands está na Lambda `docusmart-analisar`
+- [ ] Layer do Strands está na Lambda `lambda-analisar`
 - [ ] Variáveis de ambiente configuradas (`AWS_REGION_NAME`, `DYNAMO_TABLE_NAME`, `DOCUMENTS_BUCKET`)
 - [ ] Permissões IAM corretas (Textract, DynamoDB, S3, Bedrock)
 - [ ] Timeout da Lambda em **60 segundos** ou mais
