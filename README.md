@@ -64,24 +64,26 @@ Cliente (curl / Postman)
 
 ## 🗂 Estrutura do Repositório
 
-```
+```text
 ├── README.md                              # Este tutorial
-├── plano_case_c_strands.md                # Plano original do case
+├── template.yaml                          # AWS SAM template para deploy IaC
+├── frontend/                              # Interface do usuário (Streamlit)
+│   ├── app.py                             # Aplicação Streamlit principal
+│   ├── footer.png                         # Imagem do cabeçalho/rodapé
+│   └── requirements.txt                   # Dependências do frontend
 ├── docs/
-│   ├── documentos-teste/                  # Documentos para upload no S3
-│   │   ├── documento_teste_sinistro_docusmart.pdf
-│   │   ├── laudo_medico_sinistro.pdf
-│   │   ├── nota_fiscal_servico_sinistro.pdf
-│   │   ├── documento_identidade_rg.pdf
-│   │   └── Certificado de Registro e Licenciamento de Veículo.pdf
+│   ├── plano_case_c_strands.md            # Plano original do case
+│   ├── documentos-teste/                  # Documentos para upload no S3 (PDFs, Imagens)
 │   └── referencia/                        # PDF do enunciado do Hacktoon
-└── src/
-    ├── lambda_analisar/                   # Lambda POST /analisar-sinistro
-    │   ├── lambda_function.py
-    │   └── requirements.txt
-    └── lambda_consultar/                  # Lambda GET /sinistro/{id} (bônus)
-        ├── lambda_function.py
-        └── requirements.txt
+├── src/
+│   ├── lambda_analisar/                   # Lambda POST /analisar-sinistro
+│   │   ├── lambda_function.py
+│   │   └── requirements.txt
+│   └── lambda_consultar/                  # Lambda GET /sinistro/{id} (bônus)
+│       ├── lambda_function.py
+│       └── requirements.txt
+└── tests/                                 # Suíte de testes unitários
+    └── test_lambda_analisar.py
 ```
 
 ---
