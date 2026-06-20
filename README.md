@@ -27,7 +27,10 @@ Este tutorial mostra **todas as etapas** para construir do zero um micro-pipelin
 
 ---
 
-## 🏗 Arquitetura
+## 🏗️ Arquitetura da Solução
+
+![Arquitetura AWS Serverless](img/arquitectura_hackathon_grupo8.png)
+
 
 ```
 Cliente (curl / Postman)
